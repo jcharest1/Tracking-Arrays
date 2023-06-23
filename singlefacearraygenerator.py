@@ -34,8 +34,8 @@ constraints_list_1 = [
 ]
 
 def vector_length(a, b):
-    """Computes Euclidean distance between points a and b."""
-    return distance.euclidean(a, b)
+    """Computes vector and Euclidean distance between points a and b."""
+    return np.array(a) - np.array(b), distance.euclidean(a, b)
 
 def angle_between(a, b):
     """Computes angle in radians between vectors a and b."""
@@ -43,11 +43,11 @@ def angle_between(a, b):
 
 def calculate_segments(points):
     """Computes lengths of all possible segments between given points."""
-    return [(vector_length(points[i], points[j]), i, j) for i in range(len(points)) for j in range(i+1, len(points))]
+    return [(vector_length(points[i], points[j])[1], vector_length(points[i], points[j])[0], i, j) for i in range(len(points)) for j in range(i+1, len(points))]
 
 def calculate_segment_pairs(segments):
     """Computes lengths and angle for all possible pairs of segments."""
-    return [(segments[i][0], segments[j][0], angle_between(segments[i], segments[j])) for i in range(len(segments)) for j in range(i+1, len(segments))]
+    return [(segments[i][0], segments[j][0], angle_between(segments[i][1], segments[j][1])) for i in range(len(segments)) for j in range(i+1, len(segments))]
 
 def random_point(min_x=None, max_x=None, min_y=None, max_y=None, z_func=None, point=None):
     """Generates a random point in 3D space given constraints."""
@@ -65,10 +65,11 @@ def generate_points(constraints):
 
 def check_segments(segments):
     """Checks if any segment is shorter than 50 or difference between any two segments is less than 3.5."""
-    for i, (length1, _, _) in enumerate(segments):
-        if length1 < 50 or any(abs(length1 - length2) < 3.5 for length2, _, _ in segments[i+1:]):
+    for i, (length1, vector1, point1, point2) in enumerate(segments):
+        if length1 < 50 or any(abs(length1 - length2) < 3.5 for length2, vector2, _, _ in segments[i+1:]):
             return False
     return True
+
 
 def check_segment_pairs(segment_pairs, existing_segment_pairs):
     """Checks if any pair of segments matches any existing pair of segments within certain tolerances."""
@@ -98,8 +99,9 @@ def main():
             # Write to file if conditions are satisfied
             with open('marker_geometries.csv', 'a', newline='') as csvfile:
                 writer = csv.writer(csvfile)
-                writer.writerow([f"{base_name} {i+1}" + ' - Top'] + list(np.array(points).flatten()))
+                writer.writerow([f"{base_name} {i+1}"] + list(np.array(points).flatten()))
             existing_segment_pairs.extend(segment_pairs)
+            print(points)
             break
 
             break  # If successful, break the loop
