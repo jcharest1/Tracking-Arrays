@@ -5,31 +5,52 @@ from scipy.spatial import distance
 import os
 
 # Define the number of arrays and constraints for each array
-num_arrays = 2
+num_arrays = 3
 
-base_name = 'Gen Array'  # Base name for the set of arrays this is generating
+base_name = 'Gen Two Face Array'  # Base name for the set of arrays this is generating
 
-# Define constraints for each point in the arrays
+# Define constraints for each point in top face arrays
 constraints_list_1 = [
     # Point A
     {
-        'min_x': -50, 'max_x': -10, 'min_y': 30, 'max_y': 100, 
-        'z_func': lambda x, y: 0
+        'min_x': -50, 'max_x': -20, 'min_y': 40, 'max_y': 80, 
+        'z_func': lambda x, y: -y / np.tan(np.radians(70)) + 5.2 # points lie on a 70 deg plane that is a function of y
     },
     # Point B
     {
-        'min_x': 10, 'max_x': 50, 'min_y': 30, 'max_y': 100, 
-        'z_func': lambda x, y: 0
+        'min_x': 20, 'max_x': 50, 'min_y': 40, 'max_y': 80, 
+        'z_func': lambda x, y: -y / np.tan(np.radians(70)) + 5.2 # points lie on a 70 deg plane that is a function of y
     },
     # Point C
     {
-        'min_x': 10, 'max_x': 50, 'min_y': -30, 'max_y': -100, 
-        'z_func': lambda x, y: 0
+        'min_x': 20, 'max_x': 40, 'min_y': 0, 'max_y': 0, 
+        'z_func': lambda x, y: 6
     },
     # Point D
     {
-        'min_x': -50, 'max_x': -10, 'min_y': -30, 'max_y': -100, 
-        'z_func': lambda x, y: 0
+        'min_x': -40, 'max_x': -20, 'min_y': 0, 'max_y': 0, 
+        'z_func': lambda x, y: 6
+    }
+]
+
+# Define constraints for each point in bottom face arrays
+constraints_list_2 = [
+    # Point A - defined in main()
+        # New Point A is old Point D
+
+    #Point B - defined in main()
+        # New Point B is old Point C
+
+    # Point C
+    {
+        'min_x': 20, 'max_x': 50, 'min_y': -80, 'max_y': -40, 
+        'z_func': lambda x, y: -y / np.tan(np.radians(-70))-5.2
+    },
+    
+    # Point D
+    {
+        'min_x': -50, 'max_x': -20, 'min_y': -80, 'max_y': -40, 
+        'z_func': lambda x, y: -y / np.tan(np.radians(-70))-5.2
     }
 ]
 
@@ -70,6 +91,7 @@ def check_segments(segments):
             return False
     return True
 
+
 def check_segment_pairs(segment_pairs, existing_segment_pairs):
     """Checks if any pair of segments matches any existing pair of segments within certain tolerances."""
     for length1, length2, angle in segment_pairs:
@@ -83,7 +105,7 @@ def main():
         reader = csv.reader(csvfile)
         next(reader)  
         existing_segment_pairs = [pair for row in reader for pair in calculate_segment_pairs(calculate_segments(np.array([list(map(float, row[i:i+3])) for i in range(1, 13, 3)], dtype=float)))]
-        print(existing_segment_pairs)
+
     for i in range(num_arrays):
         while True:
             # Generate points and calculate segments and pairs
@@ -102,6 +124,30 @@ def main():
             existing_segment_pairs.extend(segment_pairs)
             print(points)
             break
+
+        while True:
+            # Generate points and calculate segments and pairs for bottom face
+            new_constraints = [
+                {'point': points[3]}, # New Point A is the old Point D
+                {'point': points[2]} # New Point B is the old Point C
+            ]
+            new_constraints.extend(constraints_list_2)
+            points2 = generate_points(new_constraints)
+            segments2 = calculate_segments(points2)
+            if not check_segments(segments2):
+                continue
+            segment_pairs2 = calculate_segment_pairs(segments2)
+            if not check_segment_pairs(segment_pairs2, existing_segment_pairs):
+                continue
+
+            # Write to file if conditions are satisfied
+            with open('marker_geometries.csv', 'a', newline='') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow([f"{base_name} {i+1}" + ' - Bottom'] + list(np.array(points2).flatten()))
+            existing_segment_pairs.extend(segment_pairs2)
+            print(points2)
+            break
+            
 
             break  # If successful, break the loop
 
