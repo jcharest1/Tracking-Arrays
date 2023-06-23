@@ -70,6 +70,7 @@ def check_segments(segments):
             return False
     return True
 
+
 def check_segment_pairs(segment_pairs, existing_segment_pairs):
     """Checks if any pair of segments matches any existing pair of segments within certain tolerances."""
     for length1, length2, angle in segment_pairs:
@@ -83,7 +84,7 @@ def main():
         reader = csv.reader(csvfile)
         next(reader)  
         existing_segment_pairs = [pair for row in reader for pair in calculate_segment_pairs(calculate_segments(np.array([list(map(float, row[i:i+3])) for i in range(1, 13, 3)], dtype=float)))]
-        print(existing_segment_pairs)
+
     for i in range(num_arrays):
         while True:
             # Generate points and calculate segments and pairs
@@ -98,7 +99,7 @@ def main():
             # Write to file if conditions are satisfied
             with open('marker_geometries.csv', 'a', newline='') as csvfile:
                 writer = csv.writer(csvfile)
-                writer.writerow([f"{base_name} {i+1}" + ' - Top'] + list(np.array(points).flatten()))
+                writer.writerow([f"{base_name} {i+1}"] + list(np.array(points).flatten()))
             existing_segment_pairs.extend(segment_pairs)
             print(points)
             break
