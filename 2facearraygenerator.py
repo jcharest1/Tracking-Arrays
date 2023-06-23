@@ -5,30 +5,38 @@ from scipy.spatial import distance
 import os
 
 # Define the number of arrays and constraints for each array
-num_arrays = 3
+num_arrays = 1
 
-base_name = 'Gen Two Face Array'  # Base name for the set of arrays this is generating
+base_name = '15 Deg Two Face Array'  # Base name for the set of arrays this is generating
+
+face_angle = 15
+
+x_max = 40
+x_min = 20
+
+y_max = 60
+y_min = 40
 
 # Define constraints for each point in top face arrays
 constraints_list_1 = [
     # Point A
     {
-        'min_x': -50, 'max_x': -20, 'min_y': 40, 'max_y': 80, 
-        'z_func': lambda x, y: -y / np.tan(np.radians(70)) + 5.2 # points lie on a 70 deg plane that is a function of y
+        'min_x': -x_max, 'max_x': -x_min, 'min_y': y_min, 'max_y': y_max, 
+        'z_func': lambda x, y: np.tan(np.radians(-face_angle)) * (y - 5.2) + 6 # points lie on an angled plane that is a function of y
     },
     # Point B
     {
-        'min_x': 20, 'max_x': 50, 'min_y': 40, 'max_y': 80, 
-        'z_func': lambda x, y: -y / np.tan(np.radians(70)) + 5.2 # points lie on a 70 deg plane that is a function of y
+        'min_x': x_min, 'max_x': x_max, 'min_y': y_min, 'max_y': y_max, 
+        'z_func': lambda x, y: np.tan(np.radians(-face_angle)) * (y - 5.2) + 6 # points lie on an angled plane that is a function of y
     },
     # Point C
     {
-        'min_x': 20, 'max_x': 40, 'min_y': 0, 'max_y': 0, 
+        'min_x': x_min , 'max_x': x_max, 'min_y': 0, 'max_y': 0, 
         'z_func': lambda x, y: 6
     },
     # Point D
     {
-        'min_x': -40, 'max_x': -20, 'min_y': 0, 'max_y': 0, 
+        'min_x': -x_max, 'max_x': -x_min, 'min_y': 0, 'max_y': 0, 
         'z_func': lambda x, y: 6
     }
 ]
@@ -43,14 +51,14 @@ constraints_list_2 = [
 
     # Point C
     {
-        'min_x': 20, 'max_x': 50, 'min_y': -80, 'max_y': -40, 
-        'z_func': lambda x, y: -y / np.tan(np.radians(-70))-5.2
+        'min_x': x_min, 'max_x': x_max, 'min_y': -y_max, 'max_y': -y_min, 
+        'z_func': lambda x, y: np.tan(np.radians(face_angle)) * (y + 5.2) + 6 # points lie on an angled plane that is a function of y
     },
     
     # Point D
     {
-        'min_x': -50, 'max_x': -20, 'min_y': -80, 'max_y': -40, 
-        'z_func': lambda x, y: -y / np.tan(np.radians(-70))-5.2
+        'min_x': -x_max, 'max_x': -x_min, 'min_y': -y_max, 'max_y': -y_min, 
+        'z_func': lambda x, y: np.tan(np.radians(face_angle)) * (y + 5.2) + 6 # points lie on an angled plane that is a function of y
     }
 ]
 
